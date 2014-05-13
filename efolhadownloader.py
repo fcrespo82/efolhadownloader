@@ -2,23 +2,33 @@
 #coding: utf-8
 
 from docopt import docopt
+import sys
 
-doc = """Usage:
-    efolhadownloader.py -c <cliente> -u <usuario> -s <senha> ([-a <ano> -m <mes>] | [-t] | [--ultima])
+doc = """Usage:   
+    efolhadownloader.py -c <c> -u <u> -s <s> ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
+    efolhadownloader.py --config <arquivo> ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
 
-Options:
-    -c <cliente>, --cliente 
-    -u <usuario>, --usuario
-    -s <senha>
-    -a ANO, --ano ANO     Ano de referência
-    -m MES, --mes MES     Mês de referência
-    -t, --todas           Fazer o download de TODAS as folhas
-    --ultima              Fazer o download da última folha disponível
-"""
+Login options:
+    -c <c>                  Cliente
+    -u <u>                  Matrícula
+    -s <s>                  Senha
+    --config <arquivo>      Ler usuario senha e cliente do <arquivo>
+
+Download options:
+    -a <a>                  Ano de referência
+    -m <m>                  Mês de referência
+    --todas                 Fazer o download de TODAS as folhas
+    --ultima                Fazer o download da última folha disponível
+
+General options:
+    --listar                Apenas lista as folhas (NÃO faz download)
+    --verbose               Informa o que o programa está fazendo
+
+"""#.format(sys.argv[0])
 options = docopt(doc)
 from pprint import pprint
 pprint(options)
-exit(0)
+#exit(0)
 
 import requests
 from bs4 import BeautifulSoup
@@ -33,42 +43,14 @@ enum_tipo = {
     4: "13º salário"
 }
 
-# parser = argparse.ArgumentParser(description="Faz o download do PDF da folha de pagamento especificada")
-
-# parser.add_argument("-c", "--cliente", help="Cliente ALESP=50 Tribunal de Justica 21", choices=[21, 50], type=int, required=True)
-
-# group = parser.add_argument_group()
-# group.add_argument("-u", "--usuario", help="Usuário (matrícula)", required=True)
-# group.add_argument("-s", "--senha", help="Senha", required=True)
-
-# group2 = parser.add_argument_group()
-# group2.add_argument("-a", "--ano", type=int, help="Ano de referência")
-# group2.add_argument("-m", "--mes", type=int, help="Mês de referência")
-# group2.add_argument("-t", "--todas", help="Fazer o download de TODAS as folhas", action="store_true")
-# group2.add_argument("--ultima", help="Fazer o download da última folha disponível", action="store_true", default=False)
-
-# parser.add_argument("-l", "--listar", help="Apenas listar quais folhas seriam baixadas", action="store_true", default=False)
-
-# group3 = parser.add_mutually_exclusive_group()
-# group3.add_argument("-v", "--verbose", help="Verbose (default)", action="store_const", dest="verbose", const=True, default=True)
-# group3.add_argument("-q", "--quiet", help="Quiet", action="store_const", dest="verbose", const=False)
-
-# args = parser.parse_args()
-
-#if not args.mes:
-#    args.mes = datetime.datetime.now().month
-
-#if not args.ano:
-#    args.ano = datetime.datetime.now().year
-
 def lista_todas_folhas_disponiveis(session):
-    url_cookie = 'https://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(str(args.cliente).rjust(3, "0"))
+    url_cookie = 'https://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(str(options['-c']).rjust(3, "0"))
     url_login = 'https://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
     url_lista_folhas = 'https://www.e-folha.sp.gov.br/desc_dempagto/pesqfolha.asp'
     r = s.get(url_cookie)
     form_data = {
-      "txtMatricula": args.usuario.rjust(6, "0"),
-      "txtSenha": args.senha,
+      "txtMatricula": options['-u'].rjust(6, "0"),
+      "txtSenha": options['-s'],
       "txtNPA": "000000000",
       "btOK": "ENTRAR"
     }
@@ -80,8 +62,7 @@ def lista_todas_folhas_disponiveis(session):
     folhas = []
     for pdf in pdfs:
         valores = pdf['onclick'][10:-3].split("','")
-        #print(pdf['onclick'][10:-3])
-        #print(valores)
+
         tipo = int(valores[0])
         sequencia = valores[1]
         mesref = valores[2]
@@ -103,7 +84,7 @@ def download_folha(session, folha_dict, cookie):
     url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
     local_filename = folha_dict["arquivo"]
     # NOTE the stream=True parameter
-    if args.verbose:
+    if options['--verbose']:
         print("Fazendo o download da folha {}".format(folha_dict["Folha"]))
 
     r = session.get(url, stream = True, data = folha_dict, cookies = cookie)
@@ -120,35 +101,35 @@ s = requests.session()
 folhas, cookie = lista_todas_folhas_disponiveis(s)
 #pprint(folhas)
 
-if args.todas:
+if options['--todas']:
     for folha in folhas:
-        if args.listar:
+        if options['--listar']:
             pprint(folha)
         else:
             download_folha(s, folha, cookie)
-elif args.ano or args.mes:
-    if args.ano:
-        folhas = [ folha for folha in folhas if folha["anoref"] == str(args.ano) ]
-    if args.mes:
-        folhas = [ folha for folha in folhas if folha["mesref"] == str(args.mes).rjust(2, "0") ]
+elif options['-a'] or options['-m']:
+    if options['-a']:
+        folhas = [ folha for folha in folhas if folha["anoref"] == str(options['-a']) ]
+    if options['-m']:
+        folhas = [ folha for folha in folhas if folha["mesref"] == str(options['-m']).rjust(2, "0") ]
     for folha in folhas:
-        if args.listar:
+        if options['--listar']:
             pprint(folha)
         else:
             download_folha(s, folha, cookie)
-elif args.ultima:
+elif options['--ultima']:
     ultimo_mes = folhas[0]["mesref"]
     ultimo_ano = folhas[0]["anoref"]
     folhas = [ folha for folha in folhas if folha["mesref"] == ultimo_mes and folha["anoref"] == ultimo_ano ]
     for folha in folhas:
-        if args.listar:
+        if options['--listar']:
             pprint(folha)
         else:
             download_folha(s, folha, cookie)
 else:
     folhas = [ folha for folha in folhas if folha["mesref"] == str(datetime.datetime.now().month).rjust(2, "0") and folha["anoref"] == str(datetime.datetime.now().year) ]
     for folha in folhas:
-        if args.listar:
+        if options['--listar']:
             pprint(folha)
         else:
             download_folha(s, folha, cookie)
