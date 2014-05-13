@@ -3,10 +3,18 @@
 
 from docopt import docopt
 import sys
+from pprint import pprint
+import requests
+from bs4 import BeautifulSoup
+import codecs
+import datetime
+import json
+from base64 import b64encode, b64decode
 
 doc = """Usage:   
     efolhadownloader.py -c <c> -u <u> -s <s> ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
     efolhadownloader.py --config <arquivo> ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
+    efolhadownloader.py cria_config -c <c> -u <u> -s <s> [--saida <arquivo>]
 
 Login options:
     -c <c>                  Cliente
@@ -23,19 +31,34 @@ Download options:
 General options:
     --listar                Apenas lista as folhas (NÃO faz download)
     --verbose               Informa o que o programa está fazendo
-
-"""#.format(sys.argv[0])
+    --saida <arquivo>       Nome do arquivo para salvar as configurações [default: efolha.config]
+"""
 options = docopt(doc)
-from pprint import pprint
-pprint(options)
-#exit(0)
 
-import requests
-from bs4 import BeautifulSoup
-import codecs
-import argparse
-import datetime
-from pprint import pprint
+if options['cria_config']:
+    config = {
+        'cliente': b64encode(options['-c']),
+        'usuario': b64encode(options['-u']),
+        'senha': b64encode(options['-s'])
+    }
+    with open(options['--saida'], "w") as f:
+        f.write(b64encode(json.dumps(config)))
+    exit(0)
+elif options['--config']:
+    with open(options['--config'], "r") as f:
+        file_data=f.readlines()
+        data = b64decode("".join(file_data))
+        config = json.loads(data)
+
+    config = {
+        'cliente': b64decode(config['cliente']),
+        'usuario': b64decode(config['usuario']),
+        'senha': b64decode(config['senha'])
+    }
+
+    options['-c'] = config['cliente']
+    options['-u'] = config['usuario']
+    options['-s'] = config['senha']
 
 enum_tipo = {
     1: "normal",
@@ -95,11 +118,9 @@ def download_folha(session, folha_dict, cookie):
                 f.flush()
     return local_filename
 
-
 s = requests.session()
 
 folhas, cookie = lista_todas_folhas_disponiveis(s)
-#pprint(folhas)
 
 if options['--todas']:
     for folha in folhas:
