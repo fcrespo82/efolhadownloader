@@ -10,9 +10,9 @@ import json
 from Crypto.Cipher import AES
 import md5
 
-__version__ = '0.3'
+__version__ = 'v0.4'
 
-__doc__ = '''usage:   
+__doc__ = '''usage:
     efolhadownloader.py download [--config <arquivo>] ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
     efolhadownloader.py cria_config <cliente> <usuario> <senha> [--config <arquivo>] [--chave <arquivo>] [--verbose]
     efolhadownloader.py --version
@@ -52,17 +52,17 @@ def main():
     def log(message, force=False):
         if options['--verbose'] or force:
             _datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            pprint(_datetime + ' - ' + message)
+            pprint(_datetime + ' - ' + str(message))
 
-    log('Iniciando')
+    log(u'Iniciando')
     if options['cria_config']:
-        log('Criando hash dos dados de entrada')
+        log(u'Criando hash dos dados de entrada')
         _hash = md5.new(options['<cliente>'])
         _hash.update(options['<usuario>'])
         _hash.update(options['<senha>'])
         key = _hash.hexdigest()
-        log('Hash: {}'.format(key))
-        log('Salvando hash no arquivo {}'.format(options['--chave']))
+        log(u'Hash: {}'.format(key))
+        log(u'Salvando hash no arquivo {}'.format(options['--chave']))
         with open(options['--chave'], 'wb') as key_file:
             key_file.write(key)
 
@@ -72,20 +72,20 @@ def main():
             'senha': options['<senha>']
         }
 
-        log('Encriptando dados de entrada')
+        log(u'Encriptando dados de entrada')
         encrypted = encrypt(key, json.dumps(config))
 
-        log('Salvando dados encriptados no arquivo {}'.format(options['--config']))
+        log(u'Salvando dados encriptados no arquivo {}'.format(options['--config']))
         with open(options['--config'], 'wb') as config_file:
             config_file.write(encrypted)
-        log('Finalizado\n')
+        log(u'Finalizado\n')
         exit(0)
     elif options['download']:
-        log('Carregando dados do arquivo {}'.format(options['--config']))
+        log(u'Carregando dados do arquivo {}'.format(options['--config']))
         with open(options['--config'], 'rb') as config_file:
             file_data=config_file.readlines()
             encrypted = ''.join(file_data)
-        log('Desencriptando dados com a chave contida no arquivo'.format(options['--chave']))
+        log(u'Desencriptando dados com a chave contida no arquivo'.format(options['--chave']))
         with open(options['--chave'],'rb') as key_file:
             key = ''.join(key_file.readlines())
         decrypted = decrypt(key, encrypted)
@@ -94,12 +94,12 @@ def main():
         options['<cliente>'] = config['cliente']
         options['<usuario>'] = config['usuario']
         options['<senha>'] = config['senha']
-        log('Dados carregados')
+        log(u'Dados carregados')
 
     enum_tipo = {
-        1: 'normal',
-        3: 'suplementar',
-        4: '13º salário'
+        1: u'normal',
+        3: u'suplementar',
+        4: u'13º salário'
     }
 
     def lista_todas_folhas_disponiveis(session):
@@ -119,6 +119,8 @@ def main():
         table = b.find_all('table', attrs = {'class':'tabela'})
         pdfs = table[0].find_all('img', attrs = {'alt':'pdf'})
         folhas = []
+        nome = ''
+        cliente = ''
         for pdf in pdfs:
             valores = pdf['onclick'][10:-3].split('\',\'')
 
@@ -128,21 +130,43 @@ def main():
             anoref = valores[3]
 
             detalhes = {
-                'Folha': 'Folha ref {}/{} tipo {}'.format(mesref, anoref, enum_tipo[tipo]),
+                'Folha': u'Folha ref {0}/{1} tipo {2}'.format(mesref, anoref, enum_tipo[tipo]),
                 'Tipo': tipo,
                 'sequencia': sequencia,
                 'mesref': mesref,
                 'anoref': anoref,
-                'arquivo': '{}_{}-Pagamentox-{}.pdf'.format(anoref, mesref, enum_tipo[tipo])
+                'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(anoref, mesref, enum_tipo[tipo], nome, cliente)
+            }
+
+            if nome == '' or cliente == '':
+                nome, cliente = recupera_nome_e_cliente(s, detalhes, r.cookies)
+
+            detalhes = {
+                'Folha': u'Folha ref {0}/{1} tipo {2}'.format(mesref, anoref, enum_tipo[tipo]),
+                'Tipo': tipo,
+                'sequencia': sequencia,
+                'mesref': mesref,
+                'anoref': anoref,
+                'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(anoref, mesref, enum_tipo[tipo], nome, cliente)
             }
 
             folhas.append(detalhes)
         return folhas, r.cookies
 
+    def recupera_nome_e_cliente(session, folha_dict, cookie):
+        url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
+        # NOTE the stream=True parameter
+        r = session.get(url, stream = True, data = folha_dict, cookies = cookie)
+        bs = BeautifulSoup(r.text)
+        cliente = bs.findAll('nobr')[0].text.strip()
+        nome = bs.findAll('left')[1].text.strip()
+        return nome.replace(u' ', u'_'), cliente.replace(u' ', u'_')
+
     def download_folha(session, folha_dict, cookie):
         url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
+
         local_filename = folha_dict['arquivo']
-        log('Fazendo o download da folha {}'.format(folha_dict['Folha']))
+        log(u'Fazendo o download da folha {}'.format(folha_dict['Folha']))
 
         # NOTE the stream=True parameter
         r = session.get(url, stream = True, data = folha_dict, cookies = cookie)
@@ -156,6 +180,7 @@ def main():
     s = requests.session()
 
     folhas, cookie = lista_todas_folhas_disponiveis(s)
+    #nome, cliente = recupera_nome_e_cliente(s, folhas[0], cookie)
 
     if options['--todas']:
         for folha in folhas:
@@ -190,7 +215,7 @@ def main():
             else:
                 download_folha(s, folha, cookie)
 
-    log('Finalizado')
+    log(u'Finalizado')
 
 if __name__ == '__main__':
     main()
