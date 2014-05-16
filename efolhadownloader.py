@@ -193,8 +193,4 @@ def main():
     log('Finalizado')
 
 if __name__ == '__main__':
-<<<<<<< HEAD
     main()
-=======
-    main()
->>>>>>> c1a474f707dfce70c433a0199043f24434ed87e0

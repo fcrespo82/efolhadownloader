@@ -1,6 +1,2 @@
 include README.md
-<<<<<<< HEAD
 include requirements.txt
-=======
-include requirements.txt
->>>>>>> c1a474f707dfce70c433a0199043f24434ed87e0

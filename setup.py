@@ -24,9 +24,3 @@ setup(
         'console_scripts': ['efolhadownloader = efolhadownloader:main']
     },
 )
-<<<<<<< HEAD
-=======
-
-
-
->>>>>>> c1a474f707dfce70c433a0199043f24434ed87e0
