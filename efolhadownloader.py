@@ -9,10 +9,13 @@ import datetime
 import json
 from Crypto.Cipher import AES
 import md5
+import shlex
+from subprocess import Popen, PIPE
+
 
 __version__ = '0.3'
 
-__doc__ = '''usage:   
+__doc__ = '''usage:
     efolhadownloader.py download [--config <arquivo>] ((-a <a> -m <m>) | --todas | --ultima) [--listar] [--verbose]
     efolhadownloader.py cria_config <cliente> <usuario> <senha> [--config <arquivo>] [--chave <arquivo>] [--verbose]
     efolhadownloader.py --version
@@ -37,22 +40,24 @@ common options:
 options = docopt(__doc__, version=__version__)
 
 def main():
-    def encrypt(key, message):
-        def _roundUp(numToRound, multiple):
-            return (numToRound + multiple - 1) // multiple * multiple;
-        def _paddedString(string):
-            return string.ljust(_roundUp(len(string),8), '\x00')
-        padded_message = _paddedString(message)
-        return AES.new(key).encrypt(padded_message)
+    def encrypt(password, text):
+        _command=shlex.split(u'openssl enc -aes-256-cbc -e -a -pass')
+        _command.append(u'pass:' + password)
+        po = Popen(_command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = po.communicate(text)
+        return stdout #{u'stdout': stdout, u'error': stderr, u'return_code': po.returncode }
 
-    def decrypt(key, message):
-        decrypted = AES.new(key).decrypt(message)
-        return decrypted.replace('\x00','')
+    def decrypt(password, text):
+        _command=shlex.split(u'openssl enc -aes-256-cbc -d -a -pass')
+        _command.append(u'pass:' + password)
+        po = Popen(_command, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        stdout, stderr = po.communicate(text)
+        return stdout #{u'stdout': stdout, u'error': stderr, u'return_code': po.returncode }
 
     def log(message, force=False):
         if options['--verbose'] or force:
             _datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            pprint(_datetime + ' - ' + message)
+            pprint(_datetime + ' - ' + str(message))
 
     log('Iniciando')
     if options['cria_config']:
