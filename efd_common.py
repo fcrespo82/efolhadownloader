@@ -1,5 +1,10 @@
 #!/usr/bin/python
 #coding: utf-8
+
+from subprocess import Popen, PIPE
+import os
+import shlex
+
 def encrypt(password, text):
     _command=shlex.split(u'openssl enc -aes-256-cbc -e -a -pass')
     _command.append(u'pass:' + password)
@@ -25,3 +30,16 @@ def build_dict(arguments):
         'usuario': arguments['<usuario>'],
         'senha': arguments['<senha>']
     }
+
+def full_path(path, filename):
+    return os.path.realpath(os.path.expanduser(os.path.join(path, filename)))
+
+def load_file(path):
+    _contents = ""
+    with open(path, 'rb') as _file:
+        _contents = _file.readlines()
+    return "".join(_contents)
+
+def save_file(path, text):
+    with open(path, 'wb') as _file:
+        _file.write(text)
