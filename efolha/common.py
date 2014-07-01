@@ -1,9 +1,10 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #coding: utf-8
 
 from subprocess import Popen, PIPE
 import os
 import shlex
+import datetime
 
 def encrypt(password, text):
     _command=shlex.split(u'openssl enc -aes-256-cbc -e -a -pass')
@@ -19,10 +20,10 @@ def decrypt(password, text):
     stdout, stderr = po.communicate(text)
     return stdout #{u'stdout': stdout, u'error': stderr, u'return_code': po.returncode }
 
-def log(message, force=False):
-    if force:
+def log(message, options, force=False):
+    if options.has_key('--verbose') or force:
         _datetime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        pprint(_datetime + ' - ' + str(message))
+        print(_datetime + ' - ' + message)
 
 def build_dict(arguments):
     return {
@@ -30,6 +31,11 @@ def build_dict(arguments):
         'usuario': arguments['<usuario>'],
         'senha': arguments['<senha>']
     }
+
+def file_exists(folha_dict, options):
+    _dir = options['--download_dir']
+    _full_path = full_path(_dir, folha_dict['arquivo'])
+    return os.path.exists(_full_path)
 
 def full_path(path, filename):
     return os.path.realpath(os.path.expanduser(os.path.join(path, filename)))
