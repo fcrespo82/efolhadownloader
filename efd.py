@@ -10,7 +10,7 @@ comandos:
     listar      Lista as folhas de pagamento
 '''
 
-__version__ = '0.6.3'
+__version__ = '0.7'
 
 from docopt import docopt
 from pprint import pprint

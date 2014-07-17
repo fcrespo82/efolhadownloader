@@ -47,6 +47,6 @@ def folha(folha_dict, cookie, arguments):
                     f.write(chunk)
                     f.flush()
     else:
-        common.log(u'O arquivo {} já existe e não será baixado novamente'.format(local_filename), arguments)
+        common.log(u'O arquivo {} já existe e não será baixado novamente'.format(local_filename), arguments, force = True)
 
     return full_path_download
