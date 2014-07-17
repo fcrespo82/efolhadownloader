@@ -2,7 +2,7 @@
 #coding: utf-8
 '''
 usage:
-    efolhadownloader.py listar ((<a> <m>) | -t | -u) [-d <dir> -p <arquivo> -s <dir> -v]
+    efd.py listar ((<a> <m>) | -t | -u) [-d <dir> -p <arquivo> -s <dir> -v]
 
 arguments:
     <a>                                Ano de referência
@@ -20,8 +20,10 @@ options:
 import requests
 from bs4 import BeautifulSoup
 import tipo
+from efolha import common
 
-def folhas(config, options):
+def folhas(config, arguments):
+    common.log(u'Listando folhas', arguments)
     s = requests.session()
     url_cookie = 'https://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(str(config['cliente']).rjust(3, '0'))
     url_login = 'https://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
@@ -50,36 +52,39 @@ def folhas(config, options):
         _anoref = valores[3]
 
         detalhes = {
-            'Folha': u'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, tipo.from_int(_tipo)),
-            'Tipo': _tipo,
-            'sequencia': _sequencia,
-            'mesref': _mesref,
-            'anoref': _anoref,
-            'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente)
+            u'Folha': u'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, tipo.from_int(_tipo)),
+            u'Tipo': _tipo,
+            u'sequencia': _sequencia,
+            u'mesref': _mesref,
+            u'anoref': _anoref,
+            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente)
         }
 
         if nome == '' or cliente == '':
-            nome, cliente = recupera_nome_e_cliente(s, detalhes, r.cookies)
+            nome, cliente = recupera_nome_e_cliente(s, detalhes, r.cookies, arguments)
 
         detalhes.update({
-            'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente)
+            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente, _sequencia),
+            u'nome': nome,
+            u'cliente': cliente
         })
 
         folhas.append(detalhes)
 
-        if options['<a>'] or options['<m>']:
-            if options['<a>']:
-                folhas = [ folha for folha in folhas if folha['anoref'] == str(options['<a>']) ]
-            if options['<m>']:
-                folhas = [ folha for folha in folhas if folha['mesref'] == str(options['<m>']).rjust(2, '0') ]
-        elif options['--ultima']:
+        if arguments['<a>'] or arguments['<m>']:
+            if arguments['<a>']:
+                folhas = [ folha for folha in folhas if folha['anoref'] == str(arguments['<a>']) ]
+            if arguments['<m>']:
+                folhas = [ folha for folha in folhas if folha['mesref'] == str(arguments['<m>']).rjust(2, '0') ]
+        elif arguments['--ultima']:
             ultimo_mes = folhas[0]['mesref']
             ultimo_ano = folhas[0]['anoref']
             folhas = [ folha for folha in folhas if folha['mesref'] == ultimo_mes and folha['anoref'] == ultimo_ano ]
 
     return folhas, r.cookies
 
-def recupera_nome_e_cliente(session, folha_dict, cookie):
+def recupera_nome_e_cliente(session, folha_dict, cookie, arguments):
+    common.log(u'Buscando dados de nome e cliente para as folhas', arguments)
     url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
     r = session.get(url, stream = True, data = folha_dict, cookies = cookie)

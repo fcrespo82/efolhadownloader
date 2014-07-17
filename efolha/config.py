@@ -19,6 +19,7 @@ from efolha import common
 import json
 
 def _generate_hash(arguments):
+    common.log(u'Gerando hash', arguments)
     import md5
     _hash = md5.new(arguments['<cliente>'])
     _hash.update(arguments['<usuario>'])
@@ -27,29 +28,37 @@ def _generate_hash(arguments):
     return key
 
 def _load_config(arguments):
-    return common.load_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.config'))
+    common.log(u'Carregando arquivo de configuração', arguments)
+    return common.load_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.config'), arguments)
 
 def _load_key(arguments):
-    return common.load_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.key'))
+    common.log(u'Carregando arquivo de chave', arguments)
+    return common.load_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.key'), arguments)
 
 def _save_key(arguments):
+    common.log(u'Preparando chave', arguments)
     _key = _generate_hash(arguments)
-    common.save_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.key'), _key)
+    common.save_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.key'), _key, arguments)
     return _key
 
 def _save_config(arguments):
+    common.log(u'Preparando configuração', arguments)
     _key = _load_key(arguments)
     _config = common.build_dict(arguments)
-    _encrypted = common.encrypt(_key, json.dumps(_config))
-    common.save_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.config'), _encrypted)
+    _encrypted = common.encrypt(_key, json.dumps(_config), arguments)
+    common.save_file(common.full_path(arguments['--diretorio'], arguments['--prefixo'] + '.config'), _encrypted, arguments)
 
 def load(arguments):
+    common.log(u'Carregando configuração', arguments)
     _key = _load_key(arguments)
     _config = _load_config(arguments)
-    _data = common.decrypt(_key, _config)
+    _data = common.decrypt(_key, _config, arguments)
+    common.log(u'Configuração carregada', arguments)
     return json.loads(_data)
 
 def save(arguments):
+    common.log(u'Salvando configuração', arguments)
     _save_key(arguments)
     _save_config(arguments)
+    common.log(u'Configuração salva', arguments)
 
