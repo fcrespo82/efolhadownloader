@@ -22,7 +22,9 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: MIT License",
     ],
-    install_requires = open('requirements.txt').readlines(),
+    install_requires = [ 'beautifulsoup4==4.3.2',
+        'docopt==0.6.1',
+        'requests==2.2.1'],
     entry_points = {
         'console_scripts': ['efd = efd:main', 'efolha = efd:main']
     },
