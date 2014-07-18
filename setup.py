@@ -2,11 +2,11 @@
 #coding: utf-8
 import os
 from setuptools import setup
-import efd
+from sef import __version__ as efdversion
 
 setup(
     name = "efolhadownloader",
-    version = efd.__version__,
+    version = efdversion,
     author = "Fernando Xavier de Freitas Crespo",
     author_email = "fernando82@gmail.com",
     description = ("Faça o download dos \"Demonstrativos de pagamento\" disponibilizados no site http://www.e-folha.sp.gov.br/"),
