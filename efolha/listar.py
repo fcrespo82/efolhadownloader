@@ -19,7 +19,7 @@ options:
 
 import requests
 from bs4 import BeautifulSoup
-import tipo
+from efolha import tipo
 from efolha import common
 
 def folhas(config, arguments):
