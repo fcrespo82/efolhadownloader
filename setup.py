@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name = "efolhadownloader",
-    version = '0.7',
+    version = '0.8',
     author = "Fernando Xavier de Freitas Crespo",
     author_email = "fernando82@gmail.com",
     description = ("Faça o download dos \"Demonstrativos de pagamento\" disponibilizados no site http://www.e-folha.sp.gov.br/"),
