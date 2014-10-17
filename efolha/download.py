@@ -25,12 +25,13 @@ import os
 def folha(folha_dict, cookie, arguments):
     common.log(u'Fazendo download da folha', arguments)
     session = requests.session()
-    url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
+    url = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
 
     local_filename = folha_dict['arquivo']
 
     # NOTE the stream=True parameter
-    r = session.get(url, stream = True, data = folha_dict, cookies = cookie)
+    print(folha_dict)
+    r = session.post(url, stream = True, data = folha_dict, cookies = cookie)
     _dir = arguments['--download_dir']
 
     full_path_download_dir = common.full_path(_dir)

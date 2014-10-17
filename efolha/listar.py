@@ -27,7 +27,7 @@ def folhas(config, arguments):
     s = requests.session()
     url_cookie = 'https://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(str(config['cliente']).rjust(3, '0'))
     url_login = 'https://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
-    url_lista_folhas = 'https://www.e-folha.sp.gov.br/desc_dempagto/pesqfolha.asp'
+    url_lista_folhas = 'https://www.e-folha.sp.gov.br/desc_dempagto/Folhas.asp'
     r = s.get(url_cookie)
     form_data = {
       'txtMatricula': config['usuario'].rjust(6, '0'),
@@ -46,25 +46,25 @@ def folhas(config, arguments):
     for pdf in pdfs:
         valores = pdf['onclick'][10:-3].split('\',\'')
 
-        _tipo = int(valores[0])
-        _sequencia = valores[1]
-        _mesref = valores[2]
-        _anoref = valores[3]
+        _tipo = str(int(valores[0]))
+        _sequencia = str(valores[1]).rjust(2, '0')
+        _mesref = str(valores[2]).rjust(2, '0')
+        _anoref = str(valores[3])
 
         detalhes = {
-            u'Folha': u'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, tipo.from_int(_tipo)),
+            u'Folha': u'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, tipo.from_int(int(_tipo))),
             u'Tipo': _tipo,
             u'sequencia': _sequencia,
             u'mesref': _mesref,
             u'anoref': _anoref,
-            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente)
+            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(int(_tipo)), nome, cliente)
         }
 
         if nome == '' or cliente == '':
             nome, cliente = recupera_nome_e_cliente(s, detalhes, r.cookies, arguments)
 
         detalhes.update({
-            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(_tipo), nome, cliente, _sequencia),
+            u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, tipo.from_int(int(_tipo)), nome, cliente, _sequencia),
             u'nome': nome,
             u'cliente': cliente
         })
