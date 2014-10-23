@@ -5,12 +5,7 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from pprint import pprint
-
-config = {'cliente': 50,
-    'usuario': '23296',
-    'senha': 'fern@ndo82',
-    'output_dir': '/home/fxcrespo/developer/efolhadownloader'
-}
+from secrets import config
 
 
 Tipo = {
@@ -73,52 +68,37 @@ for pdf in pdfs:
         u'Tipo': _tipo,
         u'sequencia': _sequencia,
         u'mesref': _mesref,
-        u'anoref': _anoref,
-        u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome, cliente)
+        u'anoref': _anoref
     }
 
     if nome == '' or cliente == '':
+        print('buscando nomes')
         nome, cliente = recupera_nome_e_cliente(s, detalhes, cookies)
 
     detalhes.update({
         u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome, cliente, _sequencia),
         u'nome': nome,
-        u'cliente': cliente
+        u'cliente': cliente,
+        u'description': u'{0}_{1}-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome.split('_')[0], cliente.split('_')[-1], _sequencia)
     })
 
     folhas.append(detalhes)
 
-# folha_dict = {
-#     #u'Folha': u'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, tipo.Tipo[_tipo)),
-#     u'Tipo': '1',
-#     u'sequencia': '01',
-#     u'mesref': '05',
-#     u'anoref': '2014'
-#     # u'arquivo': u'{0}_{1}-Pagamentox-{3}-{4}_{2}.pdf'.format(_anoref, _mesref, tipo.Tipo[_tipo), nome, cliente)
-# }
-
-# Tipo=1
-# anoref=2014
-# mesref=09
-# sequencia=01
-# strTarget=mostraDP
-#
-# for c in cookies:
-#     print(c)
-#
-# print(url_download)
-# print(folha_dict)
-# print(cookies)
-
 for folha in folhas:
-    r = s.post(url_download, stream = True, data = folha, cookies = cookies)
-
     full_path_download= '/'.join([config['output_dir'], folha['arquivo']])
 
     if not os.path.exists(full_path_download):
-        print('downloading')
+        r = s.post(url_download, stream = True, data = folha, cookies = cookies)
+        msg = u'Arquivo: {}'.format(folha['description'])
+        final = u' - baixando'
+        print(msg + final.rjust(80-len(msg)))
         with open(full_path_download, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
                     f.flush()
+    else:
+
+        msg = u'Arquivo: {}'.format(folha['description'])
+        final = u' - já existe'
+        print(msg + final.rjust(80-len(msg)))
