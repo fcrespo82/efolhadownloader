@@ -5,8 +5,11 @@ import sys
 sys.dont_write_bytecode = True
 import requests
 import os
+import codecs
 from bs4 import BeautifulSoup
 from pprint import pprint
+from zipfile import ZipFile
+
 from secrets import config
 
 
@@ -88,6 +91,7 @@ for pdf in pdfs:
 
 config['output_dir'] = os.path.realpath(os.path.expanduser(config['output_dir']))
 
+downloaded=[]
 for folha in folhas:
     full_path_download= os.path.join(config['output_dir'], folha['arquivo'])
 
@@ -95,6 +99,7 @@ for folha in folhas:
         os.makedirs(config['output_dir'])
 
     if not os.path.exists(full_path_download):
+        downloaded.append(full_path_download)
         r = s.post(url_download, stream = True, data = folha, cookies = cookies)
         msg = u'Arquivo: {}'.format(folha['description'])
         final = u' - baixando'
@@ -105,7 +110,18 @@ for folha in folhas:
                     f.write(chunk)
                     f.flush()
     else:
-
         msg = u'Arquivo: {}'.format(folha['description'])
         final = u' - já existe'
         print(msg + final.rjust(80-len(msg)))
+
+if len(downloaded) > 0:
+    print('Comprimindo arquivos baixados')
+    full_path_zip = os.path.join(config['output_dir'], 'folhas.zip')
+    with ZipFile(full_path_zip, 'w') as myzip:
+        for file in downloaded:
+            myzip.write(file)
+
+    full_path_log = os.path.join(config['output_dir'], 'folhas.log')
+    with codecs.open(full_path_log, 'w+', 'utf-8') as mylog:
+        for file in downloaded:
+            mylog.write(file + '\n')
