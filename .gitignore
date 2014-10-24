@@ -15,6 +15,7 @@ dist/
 eggs/
 lib/
 lib64/
+lib64
 parts/
 sdist/
 var/
@@ -57,3 +58,4 @@ docs/_build/
 *.key
 *.pdf
 secrets.py
+include
