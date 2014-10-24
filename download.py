@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #coding: utf-8
 
+import sys
+sys.dont_write_bytecode = True
 import requests
 import os
 from bs4 import BeautifulSoup
@@ -84,8 +86,13 @@ for pdf in pdfs:
 
     folhas.append(detalhes)
 
+config['output_dir'] = os.path.realpath(os.path.expanduser(config['output_dir']))
+
 for folha in folhas:
-    full_path_download= '/'.join([config['output_dir'], folha['arquivo']])
+    full_path_download= os.path.join(config['output_dir'], folha['arquivo'])
+
+    if not os.path.exists(config['output_dir']):
+        os.makedirs(config['output_dir'])
 
     if not os.path.exists(full_path_download):
         r = s.post(url_download, stream = True, data = folha, cookies = cookies)
