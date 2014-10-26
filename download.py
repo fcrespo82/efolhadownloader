@@ -9,6 +9,7 @@ import codecs
 from bs4 import BeautifulSoup
 from pprint import pprint
 from zipfile import ZipFile
+from datetime import datetime
 
 from secrets import config
 
@@ -91,15 +92,27 @@ for pdf in pdfs:
 
 config['output_dir'] = os.path.realpath(os.path.expanduser(config['output_dir']))
 
-downloaded=[]
+date = datetime.strftime(datetime.now(), '%Y_%m_%d-%H_%M_%S')
+
+full_path_zip = os.path.join(config['output_dir'], 'folhas-' + date + '.zip')
+full_path_log = os.path.join(config['output_dir'], 'folhas.log')
+
+already_downloaded = []
+if os.path.exists(full_path_log):
+    with codecs.open(full_path_log, 'r', 'utf-8') as mylog:
+        already_downloaded = mylog.readlines()
+
+already_downloaded = [ file.replace('\n', '') for file in already_downloaded ]
+
+downloaded = []
 for folha in folhas:
-    full_path_download= os.path.join(config['output_dir'], folha['arquivo'])
+    full_path_download = os.path.join(config['output_dir'], folha['arquivo'])
 
     if not os.path.exists(config['output_dir']):
         os.makedirs(config['output_dir'])
 
-    if not os.path.exists(full_path_download):
-        downloaded.append(full_path_download)
+    if folha['arquivo'] not in already_downloaded: #os.path.exists(full_path_download):
+        downloaded.append(folha['arquivo'])
         r = s.post(url_download, stream = True, data = folha, cookies = cookies)
         msg = u'Arquivo: {}'.format(folha['description'])
         final = u' - baixando'
@@ -116,12 +129,12 @@ for folha in folhas:
 
 if len(downloaded) > 0:
     print('Comprimindo arquivos baixados')
-    full_path_zip = os.path.join(config['output_dir'], 'folhas.zip')
     with ZipFile(full_path_zip, 'w') as myzip:
         for file in downloaded:
-            myzip.write(file)
+            full_path_file = os.path.join(config['output_dir'], file)
+            myzip.write(full_path_file, file)
 
-    full_path_log = os.path.join(config['output_dir'], 'folhas.log')
-    with codecs.open(full_path_log, 'w+', 'utf-8') as mylog:
+    with codecs.open(full_path_log, 'a+', 'utf-8') as mylog:
         for file in downloaded:
-            mylog.write(file + '\n')
+            if file not in already_downloaded:
+                mylog.write(file + '\n')
