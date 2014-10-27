@@ -16,7 +16,6 @@ from datetime import datetime
 
 from secrets import config
 
-
 Tipo = {
     1: 'normal',
     3: 'suplementar',
