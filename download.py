@@ -87,7 +87,7 @@ for pdf in pdfs:
         'arquivo': '{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome, cliente, _sequencia),
         'nome': nome,
         'cliente': cliente,
-        'description': '{0}_{1}-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome.split('_')[0], cliente.split('_')[-1], _sequencia)
+        'description': '{0}_{1}-{2}-{3}_{4}.pdf'.format(_anoref, _mesref, nome.split('_')[0], cliente.split('_')[-1], _sequencia)
     })
 
     folhas.append(detalhes)
