@@ -22,11 +22,6 @@ Tipo = {
     4: '13º salário'
 }
 
-NORMAL = Tipo[1] #(1, 'normal')
-SUPLEMENTAR = Tipo[3] #(3, 'suplementar')
-DECIMO_TERCEIRO = Tipo[4] #(4, '13º salário')
-
-
 def recupera_nome_e_cliente(session, folha_dict, cookie):
     url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
@@ -87,7 +82,7 @@ for pdf in pdfs:
         'arquivo': '{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome, cliente, _sequencia),
         'nome': nome,
         'cliente': cliente,
-        'description': '{0}_{1}-{2}-{3}_{4}.pdf'.format(_anoref, _mesref, nome.split('_')[0], cliente.split('_')[-1], _sequencia)
+        'description': '{0}_{1}-{2}-{3}_{4}_{2}.pdf'.format(_anoref, _mesref,  Tipo[int(_tipo)], nome.split('_')[0], cliente.split('_')[-1], _sequencia)
     })
 
     folhas.append(detalhes)
