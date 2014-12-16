@@ -35,7 +35,7 @@ def recupera_nome_e_cliente(session, folha_dict, cookie):
 
 
 SESSION = requests.session()
-URL_COOKIE = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(unicode(config['cliente']).rjust(3, '0'))
+URL_COOKIE = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={0}'.format(unicode(CONFIG['cliente']).rjust(3, '0'))
 URL_LOGIN = 'http://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
 URL_LISTA_FOLHAS = 'http://www.e-folha.sp.gov.br/desc_dempagto/Folhas.asp'
 URL_DOWNLOAD = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
