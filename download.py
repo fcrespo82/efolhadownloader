@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 #coding: utf-8
 
+"Faz o download dos demonstrativos de pagamento do site e-folha"
+
 from __future__ import unicode_literals
 from __future__ import print_function
 
@@ -10,55 +12,55 @@ import requests
 import os
 import codecs
 from bs4 import BeautifulSoup
-from pprint import pprint
 from zipfile import ZipFile
 from datetime import datetime
 
-from secrets import config
+from secrets import CONFIG
 
-Tipo = {
+TIPO = {
     1: 'normal',
     3: 'suplementar',
     4: '13º salário'
 }
 
 def recupera_nome_e_cliente(session, folha_dict, cookie):
+    "Recupera o nome e cliente do e-folha"
     url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
-    r = session.get(url, stream = True, data = folha_dict, cookies = cookie)
-    bs = BeautifulSoup(r.text)
-    cliente = bs.findAll('nobr')[0].text.strip()
-    nome = bs.findAll('left')[1].text.strip()
+    response = session.get(url, stream=True, data=folha_dict, cookies=cookie)
+    soup = BeautifulSoup(response.text)
+    cliente = soup.findAll('nobr')[0].text.strip()
+    nome = soup.findAll('left')[1].text.strip()
     return nome.replace(' ', '_'), cliente.replace(' ', '_')
 
 
-s = requests.session()
-url_cookie = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(unicode(config['cliente']).rjust(3, '0'))
-url_login = 'http://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
-url_lista_folhas = 'http://www.e-folha.sp.gov.br/desc_dempagto/Folhas.asp'
-url_download = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
+SESSION = requests.session()
+URL_COOKIE = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={}'.format(unicode(config['cliente']).rjust(3, '0'))
+URL_LOGIN = 'http://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
+URL_LISTA_FOLHAS = 'http://www.e-folha.sp.gov.br/desc_dempagto/Folhas.asp'
+URL_DOWNLOAD = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
 
-r = s.get(url_cookie)
-form_data = {
-  'txtMatricula': config['usuario'].rjust(6, '0'),
-  'txtSenha': config['senha'],
-  'txtNPA': '000000000',
-  'btOK': 'ENTRAR'
+RESPONSE = SESSION.get(URL_COOKIE)
+FORM_DATA = {
+    'txtMatricula': CONFIG['usuario'].rjust(6, '0'),
+    'txtSenha': CONFIG['senha'],
+    'txtNPA': '000000000',
+    'btOK': 'ENTRAR'
 }
 
-cookies = r.cookies
-r = s.post(url_login, data = form_data, cookies = cookies)
+COOKIES = RESPONSE.cookies
+RESPONSE = SESSION.post(URL_LOGIN, data=FORM_DATA, cookies=COOKIES)
 
-r = s.post(url_lista_folhas, cookies = cookies)
+RESPONSE = SESSION.post(URL_LISTA_FOLHAS, cookies=COOKIES)
 
-b = BeautifulSoup(r.text)
-table = b.find_all('table', attrs = {'class':'tabela'})
-pdfs = table[0].find_all('img', attrs = {'alt':'pdf'})
-folhas = []
-nome = ''
-cliente = ''
+SOUP = BeautifulSoup(RESPONSE.text)
+TABLE = SOUP.find_all('table', attrs={'class':'tabela'})
+PDFS = TABLE[0].find_all('img', attrs={'alt':'pdf'})
+FOLHAS = []
+NOME = ''
+CLIENTE = ''
 
-for pdf in pdfs:
+for pdf in PDFS:
     valores = pdf['onclick'][10:-3].split('\',\'')
 
     _tipo = unicode(int(valores[0]))
@@ -67,50 +69,55 @@ for pdf in pdfs:
     _anoref = unicode(valores[3])
 
     detalhes = {
-        'Folha': 'Folha ref {0}/{1} tipo {2}'.format(_mesref, _anoref, Tipo[int(_tipo)]),
+        'Folha': 'Folha ref {0}/{1} tipo {2}'.format(
+            _mesref, _anoref, TIPO[int(_tipo)]),
         'Tipo': _tipo,
         'sequencia': _sequencia,
         'mesref': _mesref,
         'anoref': _anoref
     }
 
-    if nome == '' or cliente == '':
+    if NOME == '' or CLIENTE == '':
         print('buscando nomes')
-        nome, cliente = recupera_nome_e_cliente(s, detalhes, cookies)
+        NOME, CLIENTE = recupera_nome_e_cliente(SESSION, detalhes, COOKIES)
 
     detalhes.update({
-        'arquivo': '{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(_anoref, _mesref, Tipo[int(_tipo)], nome, cliente, _sequencia),
-        'nome': nome,
-        'cliente': cliente,
-        'description': '{0}_{1}-{2}-{3}_{4}_{2}.pdf'.format(_anoref, _mesref,  Tipo[int(_tipo)], nome.split('_')[0], cliente.split('_')[-1], _sequencia)
+        'arquivo': '{0}_{1}-Pagamentox-{3}-{4}_{5}_{2}.pdf'.format(
+            _anoref, _mesref, TIPO[int(_tipo)], NOME, CLIENTE, _sequencia),
+        'nome': NOME,
+        'cliente': CLIENTE,
+        'description': '{0}_{1}-{2}-{3}_{4}_{2}.pdf'.format(
+            _anoref, _mesref, TIPO[int(_tipo)],
+            NOME.split('_')[0], CLIENTE.split('_')[-1])
     })
 
-    folhas.append(detalhes)
+    FOLHAS.append(detalhes)
 
-config['output_dir'] = os.path.realpath(os.path.expanduser(config['output_dir']))
+CONFIG['output_dir'] = os.path.realpath(os.path.expanduser(
+    CONFIG['output_dir']))
 
-date = datetime.strftime(datetime.now(), '%Y_%m_%d-%H_%M_%S')
+DATE = datetime.strftime(datetime.now(), '%Y_%m_%d-%H_%M_%S')
 
-full_path_zip = os.path.join(config['output_dir'], 'folhas-' + date + '.zip')
-full_path_log = os.path.join(config['output_dir'], 'folhas.log')
+FULL_PATH_ZIP = os.path.join(CONFIG['output_dir'], 'folhas-' + DATE + '.zip')
+FULL_PATH_LOG = os.path.join(CONFIG['output_dir'], 'folhas.log')
 
-already_downloaded = []
-if os.path.exists(full_path_log):
-    with codecs.open(full_path_log, 'r', 'utf-8') as mylog:
-        already_downloaded = mylog.readlines()
+ALREADY_DOWNLOADED = []
+if os.path.exists(FULL_PATH_LOG):
+    with codecs.open(FULL_PATH_LOG, 'r', 'utf-8') as mylog:
+        ALREADY_DOWNLOADED = mylog.readlines()
 
-already_downloaded = [ file.replace('\n', '') for file in already_downloaded ]
+ALREADY_DOWNLOADED = [_file.replace('\n', '') for _file in ALREADY_DOWNLOADED]
 
-downloaded = []
-for folha in folhas:
-    full_path_download = os.path.join(config['output_dir'], folha['arquivo'])
+DOWNLOADED = []
+for folha in FOLHAS:
+    full_path_download = os.path.join(CONFIG['output_dir'], folha['arquivo'])
 
-    if not os.path.exists(config['output_dir']):
-        os.makedirs(config['output_dir'])
+    if not os.path.exists(CONFIG['output_dir']):
+        os.makedirs(CONFIG['output_dir'])
 
-    if folha['arquivo'] not in already_downloaded: #os.path.exists(full_path_download):
-        downloaded.append(folha['arquivo'])
-        r = s.post(url_download, stream = True, data = folha, cookies = cookies)
+    if folha['arquivo'] not in ALREADY_DOWNLOADED:
+        DOWNLOADED.append(folha['arquivo'])
+        r = SESSION.post(URL_DOWNLOAD, stream=True, data=folha, cookies=COOKIES)
         msg = 'Arquivo: {}'.format(folha['description'])
         final = ' - baixando'
         print(msg + final.rjust(80-len(msg)))
@@ -124,14 +131,20 @@ for folha in folhas:
         final = ' - já existe'
         print(msg + final.rjust(80-len(msg)))
 
-if len(downloaded) > 0:
+if len(DOWNLOADED) > 0:
     print('Comprimindo arquivos baixados')
-    with ZipFile(full_path_zip, 'w') as myzip:
-        for file in downloaded:
-            full_path_file = os.path.join(config['output_dir'], file)
-            myzip.write(full_path_file, file)
+    with ZipFile(FULL_PATH_ZIP, 'w') as myzip:
+        for _file in DOWNLOADED:
+            full_path_file = os.path.join(CONFIG['output_dir'], _file)
+            myzip.write(full_path_file, _file)
 
-    with codecs.open(full_path_log, 'a+', 'utf-8') as mylog:
-        for file in downloaded:
-            if file not in already_downloaded:
-                mylog.write(file + '\n')
+    with codecs.open(FULL_PATH_LOG, 'a+', 'utf-8') as mylog:
+        for _file in DOWNLOADED:
+            if _file not in ALREADY_DOWNLOADED:
+                mylog.write(_file + '\n')
+
+from send_mail import SendMail
+
+MAIL = SendMail()
+
+MAIL.send(FULL_PATH_ZIP)
