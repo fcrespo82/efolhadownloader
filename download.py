@@ -118,7 +118,7 @@ for folha in FOLHAS:
     if folha['arquivo'] not in ALREADY_DOWNLOADED:
         DOWNLOADED.append(folha['arquivo'])
         r = SESSION.post(URL_DOWNLOAD, stream=True, data=folha, cookies=COOKIES)
-        msg = 'Arquivo: {}'.format(folha['description'])
+        msg = 'Arquivo: {0}'.format(folha['description'])
         final = ' - baixando'
         print(msg + final.rjust(80-len(msg)))
         with open(full_path_download, 'wb') as f:
@@ -127,7 +127,7 @@ for folha in FOLHAS:
                     f.write(chunk)
                     f.flush()
     else:
-        msg = 'Arquivo: {}'.format(folha['description'])
+        msg = 'Arquivo: {0}'.format(folha['description'])
         final = ' - já existe'
         print(msg + final.rjust(80-len(msg)))
 
