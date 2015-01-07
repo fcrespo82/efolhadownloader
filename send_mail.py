@@ -35,7 +35,3 @@ class SendMail(object):
         smtp.login(self.user, self.password)
         smtp.sendmail(msg["From"], msg["To"], msg.as_string())
         smtp.quit()
-
-    def dummy(self):
-        "Dummy method"
-        pass

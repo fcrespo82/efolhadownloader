@@ -143,8 +143,8 @@ if len(DOWNLOADED) > 0:
             if _file not in ALREADY_DOWNLOADED:
                 mylog.write(_file + '\n')
 
-from send_mail import SendMail
+    from send_mail import SendMail
 
-MAIL = SendMail()
+    MAIL = SendMail()
 
-MAIL.send(FULL_PATH_ZIP)
+    MAIL.send(FULL_PATH_ZIP)
