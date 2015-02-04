@@ -5,18 +5,20 @@ from email.MIMEBase import MIMEBase
 from email import Encoders
 import os
 
+from secrets import CONFIG
+
 class SendMail(object):
     "Send mail to my address"
     def __init__(self):
-        self.user = 'fernando82@gmail.com'
-        self.password = 'xudqowlckgtlrceq'
+        self.user = CONFIG['email_from']
+        self.password = CONFIG['email_pass']
 
     def send(self, zip_file_path):
         "Actually send the message"
         msg = MIMEMultipart()
-        msg["Subject"] = "Demonstrativo de pagamento"
-        msg["From"] = 'fernando82@gmail.com'
-        msg["To"] = 'fernando82@gmail.com'
+        msg["Subject"] = CONFIG['email_title']
+        msg["From"] = CONFIG['email_from']
+        msg["To"] = CONFIG['email_to']
 
         attach_file = MIMEBase('application', 'zip')
         attach_file.set_payload(open(zip_file_path).read())
@@ -26,11 +28,11 @@ class SendMail(object):
                                filename=os.path.basename(zip_file_path))
         msg.attach(attach_file)
 
-        body = MIMEText("Segue comprovantes de pagamento")
+        body = MIMEText(CONFIG['email_body'])
         msg.attach(body)
 
         smtp = SMTP()
-        smtp.connect('smtp.gmail.com:587')
+        smtp.connect(CONFIG['email_server_port'])
         smtp.starttls()
         smtp.login(self.user, self.password)
         smtp.sendmail(msg["From"], msg["To"], msg.as_string())
