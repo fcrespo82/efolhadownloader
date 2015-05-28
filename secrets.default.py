@@ -8,5 +8,6 @@ config={
     u'email_pass': u'',
     u'email_to': u'',
     u'email_title': u'',
-    u'email_body': u''
+    u'email_body': u'',
+    u'send_mail': True
 }

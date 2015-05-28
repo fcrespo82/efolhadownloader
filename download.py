@@ -131,7 +131,7 @@ for folha in FOLHAS:
         final = ' - já existe'
         print(msg + final.rjust(80-len(msg)))
 
-if len(DOWNLOADED) > 0:
+if len(DOWNLOADED) > 0 and CONFIG['send_mail']:
     print('Comprimindo arquivos baixados')
     with ZipFile(FULL_PATH_ZIP, 'w') as myzip:
         for _file in DOWNLOADED:
