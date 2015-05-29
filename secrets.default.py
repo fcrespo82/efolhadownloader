@@ -1,4 +1,4 @@
-config={
+CONFIG={
     u'cliente': u'',
     u'usuario': u'',
     u'senha': u'',
