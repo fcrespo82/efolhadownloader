@@ -102,9 +102,9 @@ FULL_PATH_ZIP = os.path.join(CONFIG['output_dir'], 'folhas-' + DATE + '.zip')
 FULL_PATH_LOG = os.path.join(CONFIG['output_dir'], 'folhas.log')
 
 ALREADY_DOWNLOADED = []
-#if os.path.exists(FULL_PATH_LOG):
-with codecs.open(FULL_PATH_LOG, 'r', 'utf-8') as mylog:
-    ALREADY_DOWNLOADED = mylog.readlines()
+if os.path.exists(FULL_PATH_LOG):
+    with codecs.open(FULL_PATH_LOG, 'r', 'utf-8') as mylog:
+        ALREADY_DOWNLOADED = mylog.readlines()
 
 ALREADY_DOWNLOADED = [_file.replace('\n', '') for _file in ALREADY_DOWNLOADED]
 
