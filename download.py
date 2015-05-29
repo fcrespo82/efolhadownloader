@@ -102,9 +102,9 @@ FULL_PATH_ZIP = os.path.join(CONFIG['output_dir'], 'folhas-' + DATE + '.zip')
 FULL_PATH_LOG = os.path.join(CONFIG['output_dir'], 'folhas.log')
 
 ALREADY_DOWNLOADED = []
-if os.path.exists(FULL_PATH_LOG):
-    with codecs.open(FULL_PATH_LOG, 'r', 'utf-8') as mylog:
-        ALREADY_DOWNLOADED = mylog.readlines()
+#if os.path.exists(FULL_PATH_LOG):
+with codecs.open(FULL_PATH_LOG, 'r', 'utf-8') as mylog:
+    ALREADY_DOWNLOADED = mylog.readlines()
 
 ALREADY_DOWNLOADED = [_file.replace('\n', '') for _file in ALREADY_DOWNLOADED]
 
@@ -131,20 +131,21 @@ for folha in FOLHAS:
         final = ' - já existe'
         print(msg + final.rjust(80-len(msg)))
 
-if len(DOWNLOADED) > 0 and CONFIG['send_mail']:
-    print('Comprimindo arquivos baixados')
-    with ZipFile(FULL_PATH_ZIP, 'w') as myzip:
-        for _file in DOWNLOADED:
-            full_path_file = os.path.join(CONFIG['output_dir'], _file)
-            myzip.write(full_path_file, _file)
-
+if len(DOWNLOADED) > 0:
     with codecs.open(FULL_PATH_LOG, 'a+', 'utf-8') as mylog:
         for _file in DOWNLOADED:
             if _file not in ALREADY_DOWNLOADED:
                 mylog.write(_file + '\n')
 
-    from send_mail import SendMail
+    if CONFIG['send_mail']:
+        print('Comprimindo arquivos baixados')
+        with ZipFile(FULL_PATH_ZIP, 'w') as myzip:
+            for _file in DOWNLOADED:
+                full_path_file = os.path.join(CONFIG['output_dir'], _file)
+                myzip.write(full_path_file, _file)
 
-    MAIL = SendMail()
+        from send_mail import SendMail
 
-    MAIL.send(FULL_PATH_ZIP)
+        MAIL = SendMail()
+
+        MAIL.send(FULL_PATH_ZIP)
