@@ -25,10 +25,10 @@ TIPO = {
 
 def recupera_nome_e_cliente(session, folha_dict, cookie):
     "Recupera o nome e cliente do e-folha"
-    url = 'https://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
+    url = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
     response = session.get(url, stream=True, data=folha_dict, cookies=cookie)
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
     cliente = soup.findAll('nobr')[0].text.strip()
     nome = soup.findAll('left')[1].text.strip()
     return nome.replace(' ', '_'), cliente.replace(' ', '_')
@@ -53,7 +53,7 @@ RESPONSE = SESSION.post(URL_LOGIN, data=FORM_DATA, cookies=COOKIES)
 
 RESPONSE = SESSION.post(URL_LISTA_FOLHAS, cookies=COOKIES)
 
-SOUP = BeautifulSoup(RESPONSE.text)
+SOUP = BeautifulSoup(RESPONSE.text, "html.parser")
 TABLE = SOUP.find_all('table', attrs={'class':'tabela'})
 PDFS = TABLE[0].find_all('img', attrs={'alt':'pdf'})
 FOLHAS = []
