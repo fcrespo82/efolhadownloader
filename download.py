@@ -1,10 +1,14 @@
-#!/usr/bin/env python2.7
+#!.venv/bin/python
 #coding: utf-8
 
-"Faz o download dos demonstrativos de pagamento do site e-folha"
+"""Faz o download dos demonstrativos de pagamento do site e-folha
 
-from __future__ import unicode_literals
-from __future__ import print_function
+usage:
+    download.py [-d]
+
+options:
+    -d          Enable debug messages
+"""
 
 import sys
 sys.dont_write_bytecode = True
@@ -14,8 +18,26 @@ import codecs
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from datetime import datetime
-
+import logging
+from docopt import docopt
 from secrets import CONFIG
+import coloredlogs
+
+PARAMS = docopt(__doc__)
+
+FMT = '%(asctime)s %(levelname)s %(message)s'
+DATE_FMT = '%d/%m/%Y %H:%M:%S'
+FIELD_STYLES = {'hostname': {'color': 'magenta'}, 'programname': {'color': 'cyan'}, 'name': {'color': 'blue'}, 'levelname': {'color': 'black', 'bold': True}, 'asctime': {'color': 'cyan'}}
+
+LEVEL_STYLES = {'info': {}, 'notice': {'color': 'magenta'}, 'verbose': {'color': 'blue'}, 'spam': {'color': 'green'}, 'critical': {'color': 'red', 'bold': True}, 'error': {'color': 'red'}, 'debug': {'color': 'green'}, 'warning': {'color': 'yellow'}}
+
+
+if PARAMS['-d']:
+    coloredlogs.install(level=logging.DEBUG, fmt=FMT, datefmt=DATE_FMT, level_styles=LEVEL_STYLES, field_Styles=FIELD_STYLES)
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    coloredlogs.install(level=logging.INFO, fmt=FMT, datefmt=DATE_FMT, level_styles=LEVEL_STYLES, field_Styles=FIELD_STYLES)
+    logging.basicConfig(level=logging.INFO)
 
 TIPO = {
     1: 'normal',
@@ -28,14 +50,14 @@ def recupera_nome_e_cliente(session, folha_dict, cookie):
     url = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
     response = session.get(url, stream=True, data=folha_dict, cookies=cookie)
-    soup = BeautifulSoup(response.text, "html.parser")
+    soup = BeautifulSoup(response.text, 'lxml')
     cliente = soup.findAll('nobr')[0].text.strip()
     nome = soup.findAll('left')[1].text.strip()
     return nome.replace(' ', '_'), cliente.replace(' ', '_')
 
 
 SESSION = requests.session()
-URL_COOKIE = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={0}'.format(unicode(CONFIG['cliente']).rjust(3, '0'))
+URL_COOKIE = 'http://www.e-folha.sp.gov.br/desc_dempagto/entrada.asp?cliente={0}'.format(CONFIG['cliente'].rjust(3, '0'))
 URL_LOGIN = 'http://www.e-folha.sp.gov.br/desc_dempagto/PesqSenha.asp'
 URL_LISTA_FOLHAS = 'http://www.e-folha.sp.gov.br/desc_dempagto/Folhas.asp'
 URL_DOWNLOAD = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagtoP.asp'
@@ -53,20 +75,23 @@ RESPONSE = SESSION.post(URL_LOGIN, data=FORM_DATA, cookies=COOKIES)
 
 RESPONSE = SESSION.post(URL_LISTA_FOLHAS, cookies=COOKIES)
 
-SOUP = BeautifulSoup(RESPONSE.text, "html.parser")
+SOUP = BeautifulSoup(RESPONSE.text, 'lxml')
+logging.debug("Buscando tabela que contém arquivos")
 TABLE = SOUP.find_all('table', attrs={'class':'tabela'})
+logging.debug("Buscando links para PDF")
 PDFS = TABLE[0].find_all('img', attrs={'alt':'pdf'})
 FOLHAS = []
 NOME = ''
 CLIENTE = ''
 
 for pdf in PDFS:
+    logging.debug("PDF: " + str(pdf))
     valores = pdf['onclick'][10:-3].split('\',\'')
 
-    _tipo = unicode(int(valores[0]))
-    _sequencia = unicode(valores[1]).rjust(2, '0')
-    _mesref = unicode(valores[2]).rjust(2, '0')
-    _anoref = unicode(valores[3])
+    _tipo = int(valores[0])
+    _sequencia = valores[1].rjust(2, '0')
+    _mesref = valores[2].rjust(2, '0')
+    _anoref = valores[3]
 
     detalhes = {
         'Folha': 'Folha ref {0}/{1} tipo {2}'.format(
@@ -78,7 +103,7 @@ for pdf in PDFS:
     }
 
     if NOME == '' or CLIENTE == '':
-        print('buscando nomes')
+        logging.info('Buscando nomes')
         NOME, CLIENTE = recupera_nome_e_cliente(SESSION, detalhes, COOKIES)
 
     detalhes.update({
@@ -118,18 +143,16 @@ for folha in FOLHAS:
     if folha['arquivo'] not in ALREADY_DOWNLOADED:
         DOWNLOADED.append(folha['arquivo'])
         r = SESSION.post(URL_DOWNLOAD, stream=True, data=folha, cookies=COOKIES)
-        msg = 'Arquivo: {0}'.format(folha['description'])
-        final = ' - baixando'
-        print(msg + final.rjust(80-len(msg)))
+        msg = 'Baixando: {0}'.format(folha['description'])
+        logging.info(msg)
         with open(full_path_download, 'wb') as f:
             for chunk in r.iter_content(chunk_size=1024):
                 if chunk: # filter out keep-alive new chunks
                     f.write(chunk)
                     f.flush()
     else:
-        msg = 'Arquivo: {0}'.format(folha['description'])
-        final = ' - já existe'
-        print(msg + final.rjust(80-len(msg)))
+        msg = 'JÁ EXISTE: {0}'.format(folha['description'])
+        logging.warning(msg)
 
 if len(DOWNLOADED) > 0:
     with codecs.open(FULL_PATH_LOG, 'a+', 'utf-8') as mylog:
@@ -138,7 +161,7 @@ if len(DOWNLOADED) > 0:
                 mylog.write(_file + '\n')
 
     if CONFIG['send_mail']:
-        print('Comprimindo arquivos baixados')
+        logging.info('Comprimindo arquivos baixados')
         with ZipFile(FULL_PATH_ZIP, 'w') as myzip:
             for _file in DOWNLOADED:
                 full_path_file = os.path.join(CONFIG['output_dir'], _file)
