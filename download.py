@@ -11,17 +11,17 @@ options:
 """
 
 import sys
-sys.dont_write_bytecode = True
-import requests
 import os
 import codecs
-from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from datetime import datetime
 import logging
+from bs4 import BeautifulSoup
+import requests
 from docopt import docopt
 from secrets import CONFIG
 import coloredlogs
+sys.dont_write_bytecode = True
 
 PARAMS = docopt(__doc__)
 
