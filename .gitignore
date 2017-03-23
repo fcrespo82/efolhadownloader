@@ -57,6 +57,5 @@ docs/_build/
 *.config
 *.key
 *.pdf
-secrets.py
 include
 .venv
