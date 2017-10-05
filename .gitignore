@@ -59,3 +59,4 @@ docs/_build/
 *.pdf
 include
 .venv
+secrets.py
