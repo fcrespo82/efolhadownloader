@@ -1,4 +1,5 @@
-CONFIG={
+'Configuration for the efolhadownloader'
+CONFIG = {
     u'cliente': u'',
     u'usuario': u'',
     u'senha': u'',
@@ -9,5 +10,5 @@ CONFIG={
     u'email_to': u'',
     u'email_title': u'',
     u'email_body': u'',
-    u'send_mail': True
+    u'send_mail': False
 }
