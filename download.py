@@ -123,8 +123,8 @@ def download():
         with codecs.open(full_path_log, 'r', 'utf-8') as mylog:
             already_downloaded = mylog.readlines()
 
-    already_downloaded = (_file.replace('\n', '')
-                          for _file in already_downloaded)
+    already_downloaded = [_file.replace('\n', '')
+                          for _file in already_downloaded]
 
     downloaded = []
     for folha in folhas:
