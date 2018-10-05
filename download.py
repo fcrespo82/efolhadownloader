@@ -84,7 +84,10 @@ def download():
     cliente = None
     for pdf in pdfs:
         logging.debug('PDF: %s', str(pdf))
-        valores = pdf['onclick'][10:-3].split('\',\'')
+        try:
+            valores = pdf['onclick'][10:-3].split('\',\'')
+        except:
+            continue
 
         _tipo, _sequencia, _mesref, _anoref, _ = valores
 
