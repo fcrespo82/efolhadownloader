@@ -1,4 +1,4 @@
-#!.venv/bin/python
+#!/usr/bin/env python
 #coding: utf-8
 
 'Faz o download dos demonstrativos de pagamento do site e-folha'
@@ -48,7 +48,7 @@ def recupera_nome_e_cliente(session, folha_dict, cookie):
     url = 'http://www.e-folha.sp.gov.br/desc_dempagto/DemPagto.asp'
     # NOTE the stream=True parameter
     response = session.get(url, stream=True, data=folha_dict, cookies=cookie)
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response.text, 'html.parser')
     cliente = soup.findAll('nobr')[0].text.strip()
     nome = soup.findAll('left')[1].text.strip()
     return nome.replace(' ', '_'), cliente.replace(' ', '_')
@@ -74,7 +74,7 @@ def download():
     response = session.post(url_login, data=form_data,
                             cookies=response.cookies)
     response = session.post(url_lista_folhas, cookies=response.cookies)
-    soup = BeautifulSoup(response.text, 'lxml')
+    soup = BeautifulSoup(response.text, 'html.parser')
     logging.debug('Buscando tabela que contém arquivos')
     table = soup.find_all('table', attrs={'class': 'tabela'})
     logging.debug('Buscando links para PDF')
