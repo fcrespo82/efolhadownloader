@@ -1,10 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 if test -f ./config ; then
 	. ./config
 	matricula=$(echo $matricula | base64 --decode -)
 	senha=$(echo $senha | base64 --decode -)
-	echo $matricula=$senha
 else
 	read -p "Matricula: " matricula
 	matricula=$(printf "%06d" $matricula)
@@ -34,11 +33,16 @@ for folha in $folhas; do
 	anoref=$(echo $folha | cut -d, -f4 | tr -d "'")
 	strTarget=$(echo $folha | cut -d, -f5 | tr -d "'")
 
-	if [ -f $anoref-$mesref-$tipo-$matricula.pdf ]; then
-		echo "Pulando $anoref-$mesref-$tipo-$matricula.pdf"
+	if [ -f $anoref-$mesref-$tipo-$sequencia-$matricula.pdf ]; then
+		echo "Pulando $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
 		continue
 	else
-		echo "Baixando $anoref-$mesref-$tipo-$matricula.pdf"
-		http --session /tmp/efolhasession --form POST --timeout 60 https://www.e-folha.prodesp.sp.gov.br/desc_dempagto/DemPagtoP.asp Tipo=$tipo sequencia=$sequencia mesref=$mesref anoref=$anoref strTarget=$strTarget > $anoref-$mesref-$tipo-$matricula.pdf
+		echo "Baixando $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
+		http --session /tmp/efolhasession --form --timeout 60 POST https://www.e-folha.prodesp.sp.gov.br/desc_dempagto/DemPagtoP.asp Tipo=$tipo sequencia=$sequencia mesref=$mesref anoref=$anoref strTarget=$strTarget > $anoref-$mesref-$tipo-$sequencia-$matricula.pdf
+		if [ $? -gt 0 ]; then
+			rm $anoref-$mesref-$tipo-$sequencia-$matricula.pdf
+			echo "Erro ao baixar $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
+			echo "Execute o comando de novo"
+		fi
 	fi
 done
