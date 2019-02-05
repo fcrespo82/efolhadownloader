@@ -1,22 +1,28 @@
 #!/bin/bash
 
 prepare_key() {
-	if [ -f ~/.ssh/id_rsa ]; then 
-		openssl rsa -in ~/.ssh/id_rsa -pubout > ~/.ssh/id_rsa.pub.pem
-	else
-		echo "Você não tem uma chave rsa. Por favor crie"
+	if [ ! -f ~/.ssh/id_rsa.pub.pem ]; then 
+		if [ -f ~/.ssh/id_rsa ]; then 
+			openssl rsa -in ~/.ssh/id_rsa -pubout > ~/.ssh/id_rsa.pub.pem
+		else
+			echo "Você não tem uma chave rsa. Por favor crie usando ssh-keygen para usar a funcionalidade de criptografia e salvar as configurações." 1>&2
+			return 100
+		fi
 	fi
+	return 0
 }
 
 encrypt() {
+	prepare_key
 	cat $1 | openssl rsautl -encrypt -pubin -inkey ~/.ssh/id_rsa.pub.pem
 }
 
 decrypt() {
+	prepare_key
 	cat $1 | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa
 }
 
-if [ -f ./config.enc ]; then
+if [ -f ./config.enc ] && [ -f ~/.ssh/id_rsa.pub.pem ]; then
 	eval $(decrypt ./config.enc)
 	#echo $matricula-$senha
 else
@@ -24,9 +30,13 @@ else
 	matricula=$(printf "%06d" $matricula)
 	read -s -p "Senha: " senha
 	echo
-	echo matricula=$matricula > ./config
-	echo senha=$senha >> ./config
-	encrypt ./config > ./config.enc && rm ./config
+	
+	prepare_key
+	if [ $? -eq 0 ]; then 
+		echo matricula=$matricula > ./config
+		echo senha=$senha >> ./config
+		encrypt ./config > ./config.enc && rm ./config
+	fi
 fi
 
 rm /tmp/efolhasession
