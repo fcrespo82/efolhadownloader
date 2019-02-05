@@ -1,9 +1,18 @@
 #!/bin/sh
 
-read -p "Matricula: " matricula
-matricula=$(printf "%06d" $matricula)
-read -s -p "Senha: " senha
-echo
+if test -f ./config ; then
+	. ./config
+	matricula=$(echo $matricula | base64 --decode -)
+	senha=$(echo $senha | base64 --decode -)
+	echo $matricula=$senha
+else
+	read -p "Matricula: " matricula
+	matricula=$(printf "%06d" $matricula)
+	read -s -p "Senha: " senha
+	echo
+	echo matricula=$(echo $matricula | base64 -) > ./config
+	echo senha=$(echo $senha | base64 -) >> ./config
+fi
 
 rm /tmp/efolhasession
 # Cookie
