@@ -1,16 +1,32 @@
 #!/bin/bash
 
-if test -f ./config ; then
-	. ./config
-	matricula=$(echo $matricula | base64 --decode -)
-	senha=$(echo $senha | base64 --decode -)
+prepare_key() {
+	if [ -f ~/.ssh/id_rsa ]; then 
+		openssl rsa -in ~/.ssh/id_rsa -pubout > ~/.ssh/id_rsa.pub.pem
+	else
+		echo "Você não tem uma chave rsa. Por favor crie"
+	fi
+}
+
+encrypt() {
+	cat $1 | openssl rsautl -encrypt -pubin -inkey ~/.ssh/id_rsa.pub.pem
+}
+
+decrypt() {
+	cat $1 | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa
+}
+
+if [ -f ./config.enc ]; then
+	eval $(decrypt ./config.enc)
+	#echo $matricula-$senha
 else
 	read -p "Matricula: " matricula
 	matricula=$(printf "%06d" $matricula)
 	read -s -p "Senha: " senha
 	echo
-	echo matricula=$(echo $matricula | base64 -) > ./config
-	echo senha=$(echo $senha | base64 -) >> ./config
+	echo matricula=$matricula > ./config
+	echo senha=$senha >> ./config
+	encrypt ./config > ./config.enc && rm ./config
 fi
 
 rm /tmp/efolhasession
