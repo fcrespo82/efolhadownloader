@@ -3,7 +3,7 @@
 prepare_key() {
 	if [ ! -f ~/.ssh/id_rsa.pub.pem ]; then 
 		if [ -f ~/.ssh/id_rsa ]; then 
-			openssl rsa -in ~/.ssh/id_rsa -pubout > ~/.ssh/id_rsa.pub.pem
+			openssl rsa -in ~/.ssh/id_rsa -pubout -out ~/.ssh/id_rsa.pub.pem
 		else
 			echo "Você não tem uma chave rsa. Por favor crie usando ssh-keygen para usar a funcionalidade de criptografia e salvar as configurações." 1>&2
 			return 100
