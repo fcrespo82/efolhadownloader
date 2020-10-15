@@ -39,7 +39,7 @@ else
 	fi
 fi
 
-rm /tmp/efolhasession
+rm /tmp/efolhasession &> /dev/null
 # Cookie
 http --session /tmp/efolhasession https://www.e-folha.prodesp.sp.gov.br/desc_dempagto/entrada.asp?cliente=050 &> /dev/null
 echo "Got Cookie?"
