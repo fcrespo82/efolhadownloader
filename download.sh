@@ -22,6 +22,7 @@ decrypt() {
 	cat $1 | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa
 }
 
+download_path="./"
 if [ -f ./config.enc ] && [ -f ~/.ssh/id_rsa.pub.pem ]; then
 	eval $(decrypt ./config.enc)
 	#echo $matricula-$senha
@@ -29,12 +30,14 @@ else
 	read -p "Matricula: " matricula
 	matricula=$(printf "%06d" $matricula)
 	read -s -p "Senha: " senha
+	read -p "Default path to download files to (default: ./): " download_path
 	echo
 	
 	prepare_key
 	if [ $? -eq 0 ]; then 
 		echo matricula=$matricula > ./config
 		echo senha=$senha >> ./config
+		echo download_path="$download_path" >> ./config
 		encrypt ./config > ./config.enc && rm ./config
 	fi
 fi
@@ -59,12 +62,12 @@ for folha in $folhas; do
 	anoref=$(echo $folha | cut -d, -f4 | tr -d "'")
 	strTarget=$(echo $folha | cut -d, -f5 | tr -d "'")
 
-	if [ -f $anoref-$mesref-$tipo-$sequencia-$matricula.pdf ]; then
+	if [ -f "$download_path/$anoref-$mesref-$tipo-$sequencia-$matricula.pdf" ]; then
 		echo "Pulando $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
 		continue
 	else
 		echo "Baixando $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
-		http --session /tmp/efolhasession --form --timeout 60 POST https://www.e-folha.prodesp.sp.gov.br/desc_dempagto/DemPagtoP.asp Tipo=$tipo sequencia=$sequencia mesref=$mesref anoref=$anoref strTarget=$strTarget > $anoref-$mesref-$tipo-$sequencia-$matricula.pdf
+		http --session /tmp/efolhasession --form --timeout 60 POST https://www.e-folha.prodesp.sp.gov.br/desc_dempagto/DemPagtoP.asp Tipo=$tipo sequencia=$sequencia mesref=$mesref anoref=$anoref strTarget=$strTarget > "$download_path/$anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
 		if [ $? -gt 0 ]; then
 			rm $anoref-$mesref-$tipo-$sequencia-$matricula.pdf
 			echo "Erro ao baixar $anoref-$mesref-$tipo-$sequencia-$matricula.pdf"
