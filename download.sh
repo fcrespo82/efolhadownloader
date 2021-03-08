@@ -14,12 +14,12 @@ prepare_key() {
 
 encrypt() {
 	prepare_key
-	cat $1 | openssl rsautl -encrypt -pubin -inkey ~/.ssh/id_rsa.pub.pem
+	openssl rsautl -in "$1" -encrypt -pubin -inkey ~/.ssh/id_rsa.pub.pem -passin env:ID_RSA_PASS
 }
 
 decrypt() {
 	prepare_key
-	cat $1 | openssl rsautl -decrypt -inkey ~/.ssh/id_rsa
+	openssl rsautl -in "$1" -decrypt -inkey ~/.ssh/id_rsa -passin env:ID_RSA_PASS
 }
 
 download_path="./"
