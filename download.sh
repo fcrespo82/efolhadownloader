@@ -37,7 +37,7 @@ else
 	if [ $? -eq 0 ]; then 
 		echo matricula=$matricula > ./config
 		echo senha=$senha >> ./config
-		echo download_path="$download_path" >> ./config
+		echo download_path=\"$download_path\" >> ./config
 		encrypt ./config > ./config.enc && rm ./config
 	fi
 fi
