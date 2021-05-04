@@ -1,11 +1,13 @@
 #!/bin/bash
 
-source helpers.sh
+DIR_PATH=`dirname $0`
+source "$DIR_PATH/helpers.sh"
 
 download_path="./"
-if [ -f ./config.enc ] && [ -f ~/.ssh/id_rsa.pub.pem ]; then
-	eval $(decrypt ./config.enc)
+if [ -f "$DIR_PATH/config.enc" ] && [ -f ~/.ssh/id_rsa.pub.pem ]; then
+	eval $(decrypt "$DIR_PATH/config.enc")
 	#echo $matricula-$senha
+	echo "Downloading to \"$download_path\""
 else
 	read -p "Matricula: " matricula
 	matricula=$(printf "%06d" $matricula)
@@ -15,10 +17,10 @@ else
 	
 	prepare_key
 	if [ $? -eq 0 ]; then 
-		echo matricula=$matricula > ./config
-		echo senha=$senha >> ./config
-		echo download_path=\"$download_path\" >> ./config
-		encrypt ./config > ./config.enc && rm ./config
+		echo matricula=$matricula > "$DIR_PATH/config"
+		echo senha=$senha >> "$DIR_PATH/config"
+		echo download_path=\"$download_path\" >> "$DIR_PATH/config"
+		encrypt "$DIR_PATH/config" > "$DIR_PATH/config.enc" && rm "$DIR_PATH/config"
 	fi
 fi
 
