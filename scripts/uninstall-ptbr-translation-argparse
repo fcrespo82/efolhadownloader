@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+LOCALE_DIR=$(python -c "import os; import sys; print(os.path.join(sys.base_prefix, 'share', 'locale'))")
+
+rm -f $LOCALE_DIR/pt_BR/LC_MESSAGES/argparse.mo

@@ -1,0 +1,2 @@
+#!/usr/bin/env sh
+msgfmt locale/pt_BR/LC_MESSAGES/argparse.po -o locale/pt_BR/LC_MESSAGES/argparse.mo

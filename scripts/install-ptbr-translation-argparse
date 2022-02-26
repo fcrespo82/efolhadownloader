@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+LOCALE_DIR=$(python -c "import os; import sys; print(os.path.join(sys.base_prefix, 'share', 'locale'))")
+
+mkdir -p $LOCALE_DIR
+
+# rsync files from locale to share/locale excluding .po and .py files
+rsync --progress -r --exclude=*.po --exclude=*.py -p --chmod=Fu=rw,Fg=r,Fo=r locale/ $LOCALE_DIR

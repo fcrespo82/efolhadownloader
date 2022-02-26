@@ -1,0 +1,171 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: argparse\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2022-02-25 00:26-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Fernando Xavier de Freitas Crespo <fernando82@gmail.com>\n"
+"Language-Team: pr_BR <LL@li.org>\n"
+"Language: Brazilian Portuguese\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: /usr/lib/python3.10/argparse.py:296
+msgid "usage: "
+msgstr "uso: "
+
+#: /usr/lib/python3.10/argparse.py:860
+msgid ".__call__() not defined"
+msgstr ".__call__() não definida"
+
+#: /usr/lib/python3.10/argparse.py:1203
+#, python-format
+msgid "unknown parser %(parser_name)r (choices: %(choices)s)"
+msgstr "parser desconhecido %(parser_name)r (escolhas: %(choices)s)"
+
+#: /usr/lib/python3.10/argparse.py:1263
+#, python-format
+msgid "argument \"-\" with mode %r"
+msgstr "argumento \"-\" com modo %r"
+
+#: /usr/lib/python3.10/argparse.py:1272
+#, python-format
+msgid "can't open '%(filename)s': %(error)s"
+msgstr "falha ao abrir '%(filename)s': %(error)s"
+
+#: /usr/lib/python3.10/argparse.py:1481
+#, python-format
+msgid "cannot merge actions - two groups are named %r"
+msgstr "falha ao juntar ações - dois grupos contém o nome  %r"
+
+#: /usr/lib/python3.10/argparse.py:1519
+msgid "'required' is an invalid argument for positionals"
+msgstr "'required' é um argumento inválido para posicionais"
+
+#: /usr/lib/python3.10/argparse.py:1541
+#, python-format
+msgid ""
+"invalid option string %(option)r: must start with a character "
+"%(prefix_chars)r"
+msgstr ""
+"opção inválida %(option)r: precisa começar com um caracter "
+"%(prefix_chars)r"
+
+#: /usr/lib/python3.10/argparse.py:1559
+#, python-format
+msgid "dest= is required for options like %r"
+msgstr "dest= é obrigatório para opções como %r"
+
+#: /usr/lib/python3.10/argparse.py:1576
+#, python-format
+msgid "invalid conflict_resolution value: %r"
+msgstr "valor de conflict_resolution inválido: %r"
+
+#: /usr/lib/python3.10/argparse.py:1594
+#, python-format
+msgid "conflicting option string: %s"
+msgid_plural "conflicting option strings: %s"
+msgstr[0] "opção conflitante: %s"
+msgstr[1] "opções conflitante: %s"
+
+#: /usr/lib/python3.10/argparse.py:1660
+msgid "mutually exclusive arguments must be optional"
+msgstr "argumentos mutuamente exclusivos devem ser opcionais"
+
+#: /usr/lib/python3.10/argparse.py:1728
+msgid "positional arguments"
+msgstr "argumentos posicionais"
+
+#: /usr/lib/python3.10/argparse.py:1729
+msgid "options"
+msgstr "opções"
+
+#: /usr/lib/python3.10/argparse.py:1744
+msgid "show this help message and exit"
+msgstr "mostra esta mensagem de ajuda e sai"
+
+#: /usr/lib/python3.10/argparse.py:1775
+msgid "cannot have multiple subparser arguments"
+msgstr "não é ossível ter múltiplos argumentos de subparser"
+
+#: /usr/lib/python3.10/argparse.py:1827 /usr/lib/python3.10/argparse.py:2338
+#, python-format
+msgid "unrecognized arguments: %s"
+msgstr "argumentos não reconhecidos: %s"
+
+#: /usr/lib/python3.10/argparse.py:1928
+#, python-format
+msgid "not allowed with argument %s"
+msgstr "não permitido com o argumento %s"
+
+#: /usr/lib/python3.10/argparse.py:1974 /usr/lib/python3.10/argparse.py:1988
+#, python-format
+msgid "ignored explicit argument %r"
+msgstr "argumento explícito ignorado %r"
+
+#: /usr/lib/python3.10/argparse.py:2095
+#, python-format
+msgid "the following arguments are required: %s"
+msgstr "o seguinte argumento é obrigatório: %s"
+
+#: /usr/lib/python3.10/argparse.py:2110
+#, python-format
+msgid "one of the arguments %s is required"
+msgstr "um dos argumentos %s é obrigatório"
+
+#: /usr/lib/python3.10/argparse.py:2153
+msgid "expected one argument"
+msgstr "esperado um argumento"
+
+#: /usr/lib/python3.10/argparse.py:2154
+msgid "expected at most one argument"
+msgstr "esperado no máximo um argumento"
+
+#: /usr/lib/python3.10/argparse.py:2155
+msgid "expected at least one argument"
+msgstr "esperado pelo menos um argumento"
+
+#: /usr/lib/python3.10/argparse.py:2159
+#, python-format
+msgid "expected %s argument"
+msgid_plural "expected %s arguments"
+msgstr[0] "argumento %s esperado"
+msgstr[1] "argumentos %s esperado"
+
+#: /usr/lib/python3.10/argparse.py:2217
+#, python-format
+msgid "ambiguous option: %(option)s could match %(matches)s"
+msgstr "opção ambígua: %(option)s pode ser %(matches)s"
+
+#: /usr/lib/python3.10/argparse.py:2281
+#, python-format
+msgid "unexpected option string: %s"
+msgstr "opção de cadeia de caracteres não esperada: %s"
+
+#: /usr/lib/python3.10/argparse.py:2478
+#, python-format
+msgid "%r is not callable"
+msgstr "%r não é chamável"
+
+#: /usr/lib/python3.10/argparse.py:2495
+#, python-format
+msgid "invalid %(type)s value: %(value)r"
+msgstr "tipo %(type)s inválido: %(value)r"
+
+#: /usr/lib/python3.10/argparse.py:2506
+#, python-format
+msgid "invalid choice: %(value)r (choose from %(choices)s)"
+msgstr "escolha inválida: %(value)r (escolha entre %(choices)s)"
+
+#: /usr/lib/python3.10/argparse.py:2582
+#, python-format
+msgid "%(prog)s: error: %(message)s\n"
+msgstr "%(prog)s: erro: %(message)s\n"
