@@ -3,6 +3,7 @@ import logging
 import os
 import gettext
 import argparse
+import sys
 import requests
 from bs4 import BeautifulSoup
 
@@ -10,7 +11,7 @@ VERSION = '1.0.0'
 
 
 def setup_argparse():
-    locale_dir = os.path.join(os.path.dirname(__file__), "../locale")
+    locale_dir = os.path.join(os.path.dirname(__file__), "locale")
     argparse_ptbr_translation = gettext.translation(
         'argparse', localedir=locale_dir, languages=['pt_BR'])
 
@@ -36,6 +37,10 @@ def setup_argparse():
 
 
 def main():
+    if (sys.argv[0].endswith('main.py')):
+        logging.critical(
+            'Please run this script from \'efolha-cli\' from root folder')
+        exit(1)
     parser = setup_argparse()
     args = parser.parse_args()
     log = logging.getLogger()
